@@ -131,7 +131,11 @@ public class MovimientoService {
     public List<MovimientoResponse> listarTodos(Long productoId, String tipo,
                                                  LocalDateTime fechaDesde, LocalDateTime fechaHasta) {
         TipoMovimiento tipoEnum = tipo != null ? TipoMovimiento.valueOf(tipo.toUpperCase()) : null;
-        return movimientoRepository.buscarConFiltros(productoId, tipoEnum, fechaDesde, fechaHasta).stream()
+        return movimientoRepository.findAllConRelaciones().stream()
+                .filter(m -> productoId == null || m.getProducto().getId().equals(productoId))
+                .filter(m -> tipoEnum == null || m.getTipo() == tipoEnum)
+                .filter(m -> fechaDesde == null || !m.getFecha().isBefore(fechaDesde))
+                .filter(m -> fechaHasta == null || !m.getFecha().isAfter(fechaHasta))
                 .map(this::toResponse)
                 .toList();
     }
