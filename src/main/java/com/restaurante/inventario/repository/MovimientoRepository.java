@@ -2,7 +2,6 @@ package com.restaurante.inventario.repository;
 
 import com.restaurante.inventario.model.MovimientoStock;
 import com.restaurante.inventario.model.TipoMovimiento;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,9 +12,11 @@ import java.util.List;
 public interface MovimientoRepository extends JpaRepository<MovimientoStock, Long> {
     List<MovimientoStock> findByProductoIdOrderByFechaDesc(Long productoId);
 
-    @EntityGraph(attributePaths = {"producto", "usuario", "plato"})
-    @Query("SELECT m FROM MovimientoStock m WHERE " +
-           "(:productoId IS NULL OR m.producto.id = :productoId) AND " +
+    @Query("SELECT DISTINCT m FROM MovimientoStock m " +
+           "LEFT JOIN FETCH m.producto " +
+           "LEFT JOIN FETCH m.usuario " +
+           "LEFT JOIN FETCH m.plato " +
+           "WHERE (:productoId IS NULL OR m.producto.id = :productoId) AND " +
            "(:tipo IS NULL OR m.tipo = :tipo) AND " +
            "(:fechaDesde IS NULL OR m.fecha >= :fechaDesde) AND " +
            "(:fechaHasta IS NULL OR m.fecha <= :fechaHasta) " +
